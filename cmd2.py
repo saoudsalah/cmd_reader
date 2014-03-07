@@ -23,16 +23,22 @@ def parameters(args):
     contin = False
 
     for ele in args[1:]:
-        if contin and not ele[0] == '-':
+        if contin and not ele[0] == '-' and len(ele) > 1: # to handle
             # this a argument
             queue.append(ele)
 
         elif len(ele) >= 2:
             # this an option
             if ele[0] == '-':
+                if ele[1] == '-':
+                    # long args support
+                    queue.append(ele)
+                else:
+                    for opt in ele[1:]:
+                        queue.append(opt)
+
                 contin = True
-                for opt in ele[1:]:
-                    queue.append(opt)
+
 
     return queue
     #print('\nEnd of loop')
@@ -43,22 +49,30 @@ def action(queue):
 
     # the validation of entires is done here
     # you must the same number of args as required otherwise a exception'll
-    # raised.
+    # raised. You should popleft as much as arguments you need.
     while len(queue) > 0:
-        ele = queue.popleft()
-        if ele == 'h':
-            print('h: help')
-        elif ele == 's':
-            print('s: source')
-        elif ele == 'p':
-        # this option accept a parameter
-            print('p: path, first arg {}'.format(queue.popleft()))
-        elif ele == 't':
-            print('t: three args: \n\t first {}'.format(queue.popleft()))
-            print('\t second {} \n\t third {}'.format(queue.popleft(),
-                queue.popleft()))
-        elif ele == '--add':
-            print('--add option')
+        try:
+            ele = queue.popleft()
+            if ele == 'h':
+                print('h: help')
+            elif ele == 's':
+                print('s: source')
+            elif ele == 'p':
+            # this option accept a parameter
+                print('p: path, first arg {}'.format(queue.popleft()))
+            elif ele == 't':
+                print('t: three args: \n\t first {}'.format(queue.popleft()))
+                print('\t second {} \n\t third {}'.format(queue.popleft(),
+                    queue.popleft()))
+            elif ele == '--add':
+                print('--add option, with this arg {}'.format(queue.popleft()))
+            elif ele == '--browse':
+                print('--browse option')
+            else: # just ignore invalid entries
+                pass
+        except:
+            print('Not enough arguments, to use this command {}'.format(ele))
+
 
 def main():
     '''Main function.'''
