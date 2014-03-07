@@ -15,7 +15,10 @@ import collections
 import string
 
 # methods to use append() and popleft()
+
 def parameters(args):
+    '''Reads arguments'''
+# add support for long option --
     queue = collections.deque()
     contin = False
 
@@ -32,14 +35,36 @@ def parameters(args):
                     queue.append(opt)
 
     return queue
-    print('\nEnd of loop')
-    print(queue)
+    #print('\nEnd of loop')
+    #print(queue)
 
+def action(queue):
+    '''Based on option return respence.'''
+
+    # the validation of entires is done here
+    # you must the same number of args as required otherwise a exception'll
+    # raised.
+    while len(queue) > 0:
+        ele = queue.popleft()
+        if ele == 'h':
+            print('h: help')
+        elif ele == 's':
+            print('s: source')
+        elif ele == 'p':
+        # this option accept a parameter
+            print('p: path, first arg {}'.format(queue.popleft()))
+        elif ele == 't':
+            print('t: three args: \n\t first {}'.format(queue.popleft()))
+            print('\t second {} \n\t third {}'.format(queue.popleft(),
+                queue.popleft()))
+        elif ele == '--add':
+            print('--add option')
 
 def main():
     '''Main function.'''
     print('The program is lunched.')
-    parameters(sys.argv)
+    para = parameters(sys.argv)
+    action(para)
 
 if __name__ == '__main__':
     main()
