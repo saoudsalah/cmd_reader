@@ -13,7 +13,7 @@
 # using senario : the user this program only once at the beginning.
 # the final return must a list of tuples if in this format [(option, [ars*])]
 # and he have to sepecify the number of argument for each option at the beginning.
-# return 1, last option if the process wasn't completed sucessful.
+# exit if, the last option wasn't completed sucessfully.
 
 # To do cmd3:
 # keep the same previous mecanism of getting add analysing the option and thier
@@ -23,12 +23,17 @@
 #       - A method for processing the entered parameter and prepare them to be
 #       traited (parameters()); Private method DONE
 #       - Rather than treating them, I'm going to return then in this format
-#       (option, arguments*), and it's up to the user to treat them.
+#       (option, arguments*), and it's up to the user to treat them. Done
 #       - A method for returning the results. DONE
 #       - Add a test if sys and collections are imported.
 
+# Testing:
+# a. what if the program is lanched without any argument.
+# b. The first arguments are parameters, not option should raise an exception.
+
 # Hints :
 # 1. when a argument is required and option is given instead
+# 2. add an exception and exit
 
 import sys
 import collections
@@ -36,15 +41,15 @@ import collections
 class readArgs:
     '''Read the parameter form the command line and treate them.'''
 
-    def __init__(self, args):
+    def __init__(self, args, strict=True):
         # sys.argv as argument
        self.args = args
        self.pre_options = self.parameters(self.args)
        self.rules = list()
+       self.strict = strict
 
     def parameters(self, args):
         '''Reads arguments'''
-        # add support for long option --
         queue = collections.deque()
         contin = False
 
@@ -57,7 +62,7 @@ class readArgs:
                 # this an option
                 if ele[0] == '-':
                     if ele[1] == '-':
-                        # long args support
+                        # long options support
                         queue.append(ele)
                     else:
                         for opt in ele[1:]:
@@ -66,17 +71,16 @@ class readArgs:
                     contin = True # to ajust the starting only
         return queue
 
-    def addRule(self, opt, arg=0): # add one rule at time
-        '''Getting the rules of processing input.'''
+    def addRule(self, opt, arg=0):
+        '''Add one rule.'''
 
         self.rules.append((opt, arg))
 
     def addRules(self, multi_rule):
         '''Add multiple rules at the same time.'''
         # Rules format [(option, nu_args)*]
-        # for rule in multi_rule:
-            # self.rules.append(rule)
-        pass
+        for rule in multi_rule:
+            self.rules.append(rule)
 
     def finalOptions(self, rules_tuple, entiers):
         '''Creating the final output.'''
@@ -89,12 +93,12 @@ class readArgs:
             while len(entiers) > 0:
                 ele = entiers.popleft()
                 if ele in rules.keys():
-                    temp.append(ele)
+                    temp.append(ele) # option
                     count = rules[ele]
-                    while count > 0:
+                    while count > 0: # agrs
                         arg = entiers.popleft()
-                        if arg[0] == '-': # an error.
-                            raise # 1
+                        if arg[0] == '-':
+                            raise # 1.
                         else:
                             temp.append(arg)
                             count -= 1
@@ -103,24 +107,36 @@ class readArgs:
                     temp = []
 
                 else:
-                # ignoring invalid entiers
-                    print('\tignore {}'.format(ele)) #
-                    pass
-        except:
-            # add a function that allows customizing this except
-            print('\t{} required {} arugment(s).'.format(ele, rules[ele]))
-            print(final_options) #
-            exit()
+                    if not self.strict:
+                        # ignoring invalid entiers
+                        pass
 
-        return final_options
+                        #print('\twrong entier {}'.format(ele)) #
+                    else:
+                        print('{} is not a valid option. -h or --help for the help.'.
+                              format(ele))
+                        # 2.
+                        pass # add a raise and handle it with except and exit
+
+            return final_options
+
+        except:
+            if self.strict: # not correct or enougth arguments.
+                print('\t{} required {} arugment(s).'.format(ele, rules[ele]))
+                exit(1)
+
 
     def getOptions(self):
-        return self.finalOptions(self.rules, self.pre_options)
+        if self.rules == []:
+            print('The rules within readArgs aren\'t defined yet.')
+            exit(1)
+        else:
+            return self.finalOptions(self.rules, self.pre_options)
 
 def main():
     '''Main function.'''
     print('The program is lunched.')
-    para = readArgs(sys.argv)
+    para = readArgs(sys.argv, strict=True)
     print('Initial traitement of arguments.')
     #print(para.pre_options)
 
@@ -130,12 +146,14 @@ def main():
     para.addRule('-m', 1)
     para.addRule('--add', 1)
     para.addRule('--browse')
+    para.addRules((('-n', 0), ('--help', 0), ('--source', 0)))
     print('Rules')
     print(para.rules)
     print('The final result.')
     print(para.getOptions())
-
-    # test the content of the self.pre_options after using action
+    #data = para.getOptions()
+    #for opt, args in data:
+        #print(opt, '\t', args)
 
 if __name__ == '__main__':
     main()
