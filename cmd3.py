@@ -10,6 +10,11 @@
 #   The possibility of the later one accepts an argument. DONE.
 #   Long parameters support. Done
 
+# using senario : the user this program only once at the beginning.
+# the final return must a list of tuples if in this format [(option, [ars*])]
+# and he have to sepecify the number of argument for each option at the beginning.
+# return 1, last option if the process wasn't completed sucessful.
+
 # To do cmd3:
 # keep the same previous mecanism of getting add analysing the option and thier
 # argument. However, this put the in an object, with following implemetation :
@@ -17,21 +22,21 @@
 #       sys.argv directly and provide a method to add them later;
 #       - A method for processing the entered parameter and prepare them to be
 #       traited (parameters()); Private method DONE
-#       - A method for adding cases to action method; Private method
 #       - Rather than treating them, I'm going to return then in this format
 #       (option, arguments*), and it's up to the user to treat them.
-#       - A method for returning the results.
+#       - A method for returning the results. DONE
+#       - Add a test if sys and collections are imported.
+
+# Hints :
+# 1. when a argument is required and option is given instead
 
 import sys
 import collections
-import string
-
-# methods to use append() and popleft()
 
 class readArgs:
     '''Read the parameter form the command line and treate them.'''
 
-    def __init__(self, args): # the intialization must be done by passing the
+    def __init__(self, args):
         # sys.argv as argument
        self.args = args
        self.pre_options = self.parameters(self.args)
@@ -75,10 +80,7 @@ class readArgs:
 
     def finalOptions(self, rules_tuple, entiers):
         '''Creating the final output.'''
-# ['-h', '-s', '-m', '-g', '-a', '-m', '-e', '-p', 'new', '-t', 'first', 'second', '3'])
-# [('-s', 0), ('-h', 0), ('-p', 3), ('-m', 1)]
 
-        # transulating the rule to a dictionnary
         rules = dict(rules_tuple)
         final_options = list()
         temp = list()
@@ -92,10 +94,7 @@ class readArgs:
                     while count > 0:
                         arg = entiers.popleft()
                         if arg[0] == '-': # an error.
-# [bug] : add test before adding to temp if it's an option raise an error
-# this kind of input  python cmd3.py -s -h -sh -p first second third -m -s -d
-                            print('Raise') #
-                            #break # add a raise here
+                            raise # 1
                         else:
                             temp.append(arg)
                             count -= 1
@@ -108,20 +107,15 @@ class readArgs:
                     print('\tignore {}'.format(ele)) #
                     pass
         except:
-        # [bug] : add a raise to handle the popleft while the entiers is empty and the
-        # option still require an argument . FIXED
-            #  python cmd3.py -s -h -sh -p first second third -m
+            # add a function that allows customizing this except
             print('\t{} required {} arugment(s).'.format(ele, rules[ele]))
-            #final_options.pop() # delete the arg without his parameter
+            print(final_options) #
+            exit()
+
         return final_options
 
     def getOptions(self):
         return self.finalOptions(self.rules, self.pre_options)
-
-# using senario : the user this program only once at the beginning.
-# the final return must a list of tuples if in this format [(option, [ars*])]
-# and he have to sepecify the number of argument for each option at the beginning.
-# return 1, last option if the process wasn't completed sucessful.
 
 def main():
     '''Main function.'''
@@ -134,6 +128,8 @@ def main():
     para.addRule('-h')
     para.addRule('-p', 3)
     para.addRule('-m', 1)
+    para.addRule('--add', 1)
+    para.addRule('--browse')
     print('Rules')
     print(para.rules)
     print('The final result.')
