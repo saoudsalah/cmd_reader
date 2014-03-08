@@ -8,7 +8,7 @@
 #       i.e. -p /path/ -s source DONE.
 #   The previous function with add support to grouped paramters -psj , and with
 #   The possibility of the later one accepts an argument. DONE.
-#   Long parameters support. IMPOSSIBLE WITH THIS IMPLEMETATION
+#   Long parameters support. Done
 
 import sys
 import collections
@@ -23,7 +23,7 @@ def parameters(args):
     contin = False
 
     for ele in args[1:]:
-        if contin and not ele[0] == '-' and len(ele) > 1: # to handle
+        if contin and not ele[0] == '-':
             # this a argument
             queue.append(ele)
 
@@ -35,14 +35,12 @@ def parameters(args):
                     queue.append(ele)
                 else:
                     for opt in ele[1:]:
-                        queue.append(opt)
+                        queue.append('-' + opt)
 
-                contin = True
+                contin = True # to ajust the starting only
 
 
     return queue
-    #print('\nEnd of loop')
-    #print(queue)
 
 def action(queue):
     '''Based on option return respence.'''
@@ -51,16 +49,20 @@ def action(queue):
     # you must the same number of args as required otherwise a exception'll
     # raised. You should popleft as much as arguments you need.
     while len(queue) > 0:
+        # [Bug] : add an other check when argument is not entred not pop the next
+        # option but raise an error
+        # Create a list of different options and each poped item should be
+        # containeted within this list.
         try:
             ele = queue.popleft()
-            if ele == 'h':
+            if ele == '-h':
                 print('h: help')
-            elif ele == 's':
+            elif ele == '-s':
                 print('s: source')
-            elif ele == 'p':
+            elif ele == '-p':
             # this option accept a parameter
                 print('p: path, first arg {}'.format(queue.popleft()))
-            elif ele == 't':
+            elif ele == '-t':
                 print('t: three args: \n\t first {}'.format(queue.popleft()))
                 print('\t second {} \n\t third {}'.format(queue.popleft(),
                     queue.popleft()))
@@ -72,6 +74,7 @@ def action(queue):
                 pass
         except:
             print('Not enough arguments, to use this command {}'.format(ele))
+            break # when an error happened he'll exit
 
 
 def main():
