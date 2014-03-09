@@ -41,12 +41,11 @@ import collections
 class readArgs:
     '''Read the parameter form the command line and treate them.'''
 
-    def __init__(self, args, strict=True):
+    def __init__(self, args):
         # sys.argv as argument
        self.args = args
        self.pre_options = self.parameters(self.args)
        self.rules = list()
-       self.strict = strict
 
     def parameters(self, args):
         '''Reads arguments'''
@@ -61,20 +60,19 @@ class readArgs:
             elif len(ele) >= 2:
                 # this an option
                 if ele[0] == '-':
+                    contin = True # to ajust the starting only
                     if ele[1] == '-':
                         # long options support
                         queue.append(ele)
                     else:
                         for opt in ele[1:]:
                             queue.append('-' + opt)
-
-                    contin = True # to ajust the starting only
         return queue
 
     def addRule(self, opt, arg=0):
         '''Add one rule.'''
 
-        self.rules.append((opt, arg))
+        self.rules.append((opt, int(arg)))
 
     def addRules(self, multi_rule):
         '''Add multiple rules at the same time.'''
@@ -98,7 +96,7 @@ class readArgs:
                     while count > 0: # agrs
                         arg = entiers.popleft()
                         if arg[0] == '-':
-                            raise # 1.
+                            raise ValueError(arg) # 1.
                         else:
                             temp.append(arg)
                             count -= 1
@@ -107,23 +105,18 @@ class readArgs:
                     temp = []
 
                 else:
-                    if not self.strict:
-                        # ignoring invalid entiers
-                        pass
-
-                        #print('\twrong entier {}'.format(ele)) #
-                    else:
-                        print('{} is not a valid option. -h or --help for the help.'.
-                              format(ele))
-                        # 2.
-                        pass # add a raise and handle it with except and exit
+                    # not defined options
+                    print('"{}" is not a valid option.'.format(ele))
+                    exit(1)
 
             return final_options
 
-        except:
-            if self.strict: # not correct or enougth arguments.
-                print('\t{} required {} arugment(s).'.format(ele, rules[ele]))
-                exit(1)
+        except IndexError:
+            print('\t"{}" require "{}" arugment(s).'.format(ele, rules[ele]))
+            exit(1)
+        except ValueError as err: # this for non valid argument
+            print('"{}" is not an a valid argument.'.format(err))
+            exit(1)
 
 
     def getOptions(self):
@@ -136,7 +129,7 @@ class readArgs:
 def main():
     '''Main function.'''
     print('The program is lunched.')
-    para = readArgs(sys.argv, strict=True)
+    para = readArgs(sys.argv)
     print('Initial traitement of arguments.')
     #print(para.pre_options)
 
