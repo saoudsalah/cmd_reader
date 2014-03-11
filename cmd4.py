@@ -42,6 +42,12 @@
 import sys
 import collections
 
+class Duplicated(Exception):
+    def __init__(self):
+        pass
+
+
+
 class readArgs:
     '''Read the parameter form the command line and treate them.'''
 
@@ -100,7 +106,6 @@ class readArgs:
     def finalOptions(self, rules, entiers):
         '''Creating the final output.'''
 
-        #rules = dict(rules_tuple)
         final_options = dict()
         temp = list()
 
@@ -110,7 +115,7 @@ class readArgs:
                 if ele in rules.keys():
 
                     if ele in final_options.keys():
-                        raise
+                        raise Duplicated
                     else:
                         final_options[ele] = None # option
 
@@ -138,6 +143,9 @@ class readArgs:
             exit(1)
         except ValueError as err: # this for non valid argument
             print('"{}" is not an a valid argument.'.format(err))
+            exit(1)
+        except Duplicated:
+            print('You entered the same option twise.')
             exit(1)
 
 
